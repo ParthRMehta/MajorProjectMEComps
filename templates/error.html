@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreditSense — Error</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-grid"></div>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <div class="logo"><span class="logo-icon">◈</span><span class="logo-text">CreditSense</span></div>
+    </header>
+    <section class="verdict-section">
+      <div class="verdict-card verdict-rejected" style="max-width:520px;margin:0 auto;">
+        <div class="verdict-icon">!</div>
+        <div class="verdict-body">
+          <p class="verdict-label">Input Error</p>
+          <h2 class="verdict-title" style="font-size:1.8rem;">Invalid Input</h2>
+          <p class="verdict-confidence">{{ error }}</p>
+        </div>
+        <a href="/" class="submit-btn" style="display:inline-block;text-decoration:none;margin-top:1.5rem;">
+          ← Try Again
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

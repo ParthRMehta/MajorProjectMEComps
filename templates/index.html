@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreditSense — Credit Card Default Prediction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-grid"></div>
+
+  <div class="page-wrapper">
+
+    <header class="site-header">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">CreditSense</span>
+      </div>
+      <nav class="header-nav">
+        <span class="nav-tag">AI-Powered</span>
+        <span class="nav-tag">Explainable</span>
+        <span class="nav-tag">UCI Dataset</span>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <p class="hero-eyebrow">Credit Card Default Prediction</p>
+      <h1 class="hero-title">
+        Predict Credit Card<br />
+        <em>Default Risk</em><br />
+        Instantly
+      </h1>
+      <p class="hero-sub">
+        Trained on the UCI Taiwan Credit Card dataset — 30 000 real records,<br />
+        SHAP-explained decisions, transparent risk flags every time.
+      </p>
+    </section>
+
+    <main class="form-section">
+      <div class="form-card">
+
+        <div class="form-card-header">
+          <div class="form-card-title">
+            <span class="card-icon">⬡</span>
+            Applicant Details
+          </div>
+          <p class="form-card-subtitle">Enter credit card holder information below</p>
+        </div>
+
+        <form method="post" action="/predict" class="loan-form" novalidate>
+          <div class="field-grid">
+
+            <!-- Credit Limit -->
+            <div class="field-group">
+              <label for="limit_bal" class="field-label">
+                <span class="label-icon">$</span> Credit Limit
+              </label>
+              <div class="input-wrap">
+                <input type="number" id="limit_bal" name="limit_bal"
+                  placeholder="e.g. 50000" min="1000" max="1000000"
+                  class="field-input" required />
+                <span class="input-unit">NT$</span>
+              </div>
+              <span class="field-hint">Approved credit limit (NT dollars)</span>
+            </div>
+
+            <!-- Age -->
+            <div class="field-group">
+              <label for="age" class="field-label">
+                <span class="label-icon">◎</span> Age
+              </label>
+              <div class="input-wrap">
+                <input type="number" id="age" name="age"
+                  placeholder="e.g. 35" min="18" max="100"
+                  class="field-input" required />
+                <span class="input-unit">yrs</span>
+              </div>
+              <span class="field-hint">Cardholder age (18–100)</span>
+            </div>
+
+            <!-- Education -->
+            <div class="field-group">
+              <label for="education" class="field-label">
+                <span class="label-icon">🎓</span> Education Level
+              </label>
+              <div class="input-wrap select-wrap">
+                <select id="education" name="education" class="field-input field-select" required>
+                  <option value="" disabled selected>Select education</option>
+                  <option value="1">Graduate School</option>
+                  <option value="2">University</option>
+                  <option value="3">High School</option>
+                  <option value="4">Other</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-hint">Highest level of education</span>
+            </div>
+
+            <!-- Marriage -->
+            <div class="field-group">
+              <label for="marriage" class="field-label">
+                <span class="label-icon">💍</span> Marital Status
+              </label>
+              <div class="input-wrap select-wrap">
+                <select id="marriage" name="marriage" class="field-input field-select" required>
+                  <option value="" disabled selected>Select status</option>
+                  <option value="1">Married</option>
+                  <option value="2">Single</option>
+                  <option value="3">Other</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-hint">Current marital status</span>
+            </div>
+
+            <!-- Payment Status -->
+            <div class="field-group field-group-wide">
+              <label for="pay_0" class="field-label">
+                <span class="label-icon">⚡</span> Payment Status — Last Month
+              </label>
+              <div class="input-wrap select-wrap">
+                <select id="pay_0" name="pay_0" class="field-input field-select" required>
+                  <option value="" disabled selected>Select payment status</option>
+                  <option value="-2">No Consumption (no bill this month)</option>
+                  <option value="-1">Paid in Full (paid duly)</option>
+                  <option value="0">Revolving Credit (minimum payment)</option>
+                  <option value="1">Payment Delay — 1 Month</option>
+                  <option value="2">Payment Delay — 2 Months</option>
+                  <option value="3">Payment Delay — 3 Months</option>
+                  <option value="4">Payment Delay — 4 Months</option>
+                  <option value="5">Payment Delay — 5 Months</option>
+                  <option value="6">Payment Delay — 6+ Months</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-hint">Repayment status of the previous month's bill</span>
+            </div>
+
+            <!-- Bill Amount -->
+            <div class="field-group">
+              <label for="bill_amt1" class="field-label">
+                <span class="label-icon">📄</span> Bill Amount Last Month
+              </label>
+              <div class="input-wrap">
+                <input type="number" id="bill_amt1" name="bill_amt1"
+                  placeholder="e.g. 15000" min="0"
+                  class="field-input" required />
+                <span class="input-unit">NT$</span>
+              </div>
+              <span class="field-hint">Statement amount on most recent bill</span>
+            </div>
+
+            <!-- Payment Amount -->
+            <div class="field-group">
+              <label for="pay_amt1" class="field-label">
+                <span class="label-icon">💳</span> Payment Amount Last Month
+              </label>
+              <div class="input-wrap">
+                <input type="number" id="pay_amt1" name="pay_amt1"
+                  placeholder="e.g. 5000" min="0"
+                  class="field-input" required />
+                <span class="input-unit">NT$</span>
+              </div>
+              <span class="field-hint">Amount paid on most recent statement</span>
+            </div>
+
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span class="btn-text">Analyse Application</span>
+            <span class="btn-icon">→</span>
+          </button>
+
+        </form>
+      </div>
+
+      <aside class="info-panel">
+        <div class="info-block">
+          <div class="info-icon">🏦</div>
+          <h3>Real Dataset</h3>
+          <p>Trained on 30 000 real Taiwanese credit card holders (UCI ML Repository, 2016).</p>
+        </div>
+        <div class="info-block">
+          <div class="info-icon">🔍</div>
+          <h3>SHAP Explanations</h3>
+          <p>Every decision shows which features drove the outcome, not just a black-box score.</p>
+        </div>
+        <div class="info-block">
+          <div class="info-icon">🛡</div>
+          <h3>Risk Flags</h3>
+          <p>Automatic heuristic checks on payment delay, utilisation, and repayment rate.</p>
+        </div>
+        <div class="info-block">
+          <div class="info-icon">📊</div>
+          <h3>Full Diagnostics</h3>
+          <p>ROC curve, confusion matrix, precision-recall, and model comparison on every result.</p>
+        </div>
+        <div class="model-badge">
+          <span class="badge-dot"></span>
+          Random Forest · Youden Threshold · SHAP
+        </div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <span>CreditSense · UCI Credit Card Default Dataset · Taiwan 2005</span>
+      <span>Yeh & Lien (2009) — Expert Systems with Applications</span>
+    </footer>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.field-input').forEach(input => {
+      input.addEventListener('focus', () => input.closest('.field-group').classList.add('focused'));
+      input.addEventListener('blur', () => {
+        input.closest('.field-group').classList.remove('focused');
+        input.closest('.field-group').classList.toggle('filled', !!input.value);
+      });
+    });
+    document.querySelector('.loan-form').addEventListener('submit', function() {
+      const btn = document.querySelector('.submit-btn');
+      btn.classList.add('loading');
+      btn.querySelector('.btn-text').textContent = 'Analysing…';
+    });
+  </script>
+
+</body>
+</html>

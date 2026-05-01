@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreditSense — Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-grid"></div>
+
+  <div class="page-wrapper result-page">
+
+    <header class="site-header">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">CreditSense</span>
+      </div>
+      <a href="/" class="back-link">← New Assessment</a>
+    </header>
+
+    <!-- ── VERDICT ──────────────────────────────────────────────────────────── -->
+    <section class="verdict-section">
+      <div class="verdict-card {{ 'verdict-approved' if prediction == 'Approved' else 'verdict-rejected' }}">
+        <div class="verdict-icon">{{ '✓' if prediction == 'Approved' else '✕' }}</div>
+        <div class="verdict-body">
+          <p class="verdict-label">Decision</p>
+          <h2 class="verdict-title">{{ prediction }}</h2>
+          <p class="verdict-confidence">
+            Confidence: <strong>{{ confidence }}%</strong> ·
+            Default probability: <strong>{{ prob_risk }}%</strong>
+          </p>
+        </div>
+        <div class="verdict-reason">
+          <span class="reason-chip">{{ reason }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="result-grid">
+
+      <!-- ── INPUT SUMMARY ──────────────────────────────────────────────────── -->
+      <section class="result-card inputs-card">
+        <h3 class="card-title"><span class="ct-icon">📋</span> Application Summary</h3>
+        <dl class="input-list">
+          {% for key, val in inputs.items() %}
+          <div class="input-row">
+            <dt>{{ key }}</dt>
+            <dd>{{ val }}</dd>
+          </div>
+          {% endfor %}
+        </dl>
+      </section>
+
+      <!-- ── MODEL METRICS ──────────────────────────────────────────────────── -->
+      <section class="result-card metrics-card">
+        <h3 class="card-title"><span class="ct-icon">⚡</span> Model Metrics</h3>
+        <div class="metrics-grid">
+          <div class="metric-block">
+            <span class="metric-val">{{ metrics.accuracy }}</span>
+            <span class="metric-lbl">Accuracy</span>
+          </div>
+          <div class="metric-block metric-block-highlight">
+            <span class="metric-val">{{ metrics.roc_auc }}</span>
+            <span class="metric-lbl">ROC-AUC</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-val">{{ metrics.precision }}</span>
+            <span class="metric-lbl">Precision</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-val">{{ metrics.recall }}</span>
+            <span class="metric-lbl">Recall</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-val">{{ metrics.f1 }}</span>
+            <span class="metric-lbl">F1 Score</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-val">{{ metrics.balanced_accuracy }}</span>
+            <span class="metric-lbl">Balanced Acc.</span>
+          </div>
+        </div>
+        {% if cv_summary %}
+        <div class="cv-block">
+          <span class="cv-label">Cross-Validation AUC</span>
+          <span class="cv-val">{{ cv_summary.cv_auc_mean }} {{ cv_summary.cv_auc_std }}</span>
+          <span class="cv-folds">{{ cv_summary.cv_folds }}</span>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- ── RISK FLAGS ──────────────────────────────────────────────────────── -->
+      <section class="result-card flags-card">
+        <h3 class="card-title"><span class="ct-icon">🛡</span> Risk Flags</h3>
+        <div class="flags-list">
+          {% for flag in risk_flags %}
+          <div class="flag-item flag-{{ flag.level }}">
+            <span class="flag-icon">
+              {% if flag.level == 'warning' %}⚠{% elif flag.level == 'caution' %}⚑{% else %}✔{% endif %}
+            </span>
+            <div>
+              <strong>{{ flag.label }}</strong>
+              <p>{{ flag.detail }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ── SHAP EXPLANATION ────────────────────────────────────────────────── -->
+      <section class="result-card shap-card">
+        <h3 class="card-title"><span class="ct-icon">🔍</span> SHAP Feature Attribution</h3>
+        <div class="shap-table">
+          <div class="shap-header">
+            <span>Feature</span>
+            <span>SHAP Value</span>
+            <span>Impact Direction</span>
+          </div>
+          {% for feature, value in explanation %}
+          <div class="shap-row">
+            <span class="shap-feat">{{ feature }}</span>
+            <span class="shap-val shap-mono">{{ "%.4f"|format(value) }}</span>
+            <div class="shap-bar-wrap">
+              <div class="shap-bar {{ 'shap-bar-pos' if value > 0 else 'shap-bar-neg' }}"
+                   style="width: {{ [value|abs * 300, 100]|min }}%"></div>
+              <span class="shap-dir">{{ '↑ Risk' if value > 0 else '↓ Risk' }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <img src="{{ url_for('static', filename='plot.png') }}" class="chart-img" alt="SHAP plot" />
+      </section>
+
+      <!-- ── CONFUSION MATRIX ────────────────────────────────────────────────── -->
+      <section class="result-card chart-card">
+        <h3 class="card-title"><span class="ct-icon">🗂</span> Confusion Matrix</h3>
+        <img src="{{ url_for('static', filename='confusion_matrix.png') }}" class="chart-img" alt="Confusion matrix" />
+      </section>
+
+      <!-- ── ROC CURVE ──────────────────────────────────────────────────────── -->
+      <section class="result-card chart-card">
+        <h3 class="card-title"><span class="ct-icon">📈</span> ROC Curve</h3>
+        <img src="{{ url_for('static', filename='roc_curve.png') }}" class="chart-img" alt="ROC curve" />
+      </section>
+
+      <!-- ── PRECISION-RECALL ────────────────────────────────────────────────── -->
+      <section class="result-card chart-card">
+        <h3 class="card-title"><span class="ct-icon">🎯</span> Precision-Recall Curve</h3>
+        <img src="{{ url_for('static', filename='pr_curve.png') }}" class="chart-img" alt="PR curve" />
+      </section>
+
+      <!-- ── FEATURE IMPORTANCE ─────────────────────────────────────────────── -->
+      <section class="result-card chart-card">
+        <h3 class="card-title"><span class="ct-icon">📐</span> Feature Importance</h3>
+        <img src="{{ url_for('static', filename='feature_importance.png') }}" class="chart-img" alt="Feature importance" />
+      </section>
+
+      <!-- ── MODEL COMPARISON ───────────────────────────────────────────────── -->
+      <section class="result-card chart-card chart-card-wide">
+        <h3 class="card-title"><span class="ct-icon">⚖</span> Model Comparison (Accuracy & AUC)</h3>
+        <img src="{{ url_for('static', filename='model_comparison.png') }}" class="chart-img" alt="Model comparison" />
+      </section>
+
+    </div>
+
+    <footer class="site-footer">
+      <span>CreditSense v3 · HistGBM + RF Stacking · Youden Threshold · 5-fold CV</span>
+      <span>LendingClub dataset 2007–2018</span>
+    </footer>
+
+  </div>
+
+  <script>
+    // Animate metric values counting up
+    document.querySelectorAll('.metric-val').forEach(el => {
+      const raw = parseFloat(el.textContent);
+      if (isNaN(raw)) return;
+      let startTime = null;
+      const duration = 900;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        const p = Math.min((ts - startTime) / duration, 1);
+        el.textContent = (raw * p).toFixed(2) + '%';
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  </script>
+
+</body>
+</html>

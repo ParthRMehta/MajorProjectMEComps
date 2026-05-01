@@ -1,0 +1,8 @@
+{
+  "accuracy": "74.94%",
+  "precision": "48.56%",
+  "recall": "63.72%",
+  "f1": "55.11%",
+  "roc_auc": "76.88%",
+  "balanced_accuracy": "71.12%"
+}
